@@ -16,7 +16,6 @@ import (
 	"gitee.com/unitedrhino/share/stores"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
-	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -47,11 +46,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AuthRpc = sysdirect.NewRole(c.SysRpc.RunProxy)
 		Common = sysdirect.NewCommon(c.SysRpc.RunProxy)
 	} else {
-		TenantRpc = tenant.NewTenantManage(zrpc.MustNewClient(c.SysRpc.Conf))
-		LogRpc = log.NewLog(zrpc.MustNewClient(c.SysRpc.Conf))
-		UserRpc = user.NewUserManage(zrpc.MustNewClient(c.SysRpc.Conf))
-		AuthRpc = role.NewRoleManage(zrpc.MustNewClient(c.SysRpc.Conf))
-		Common = common.NewCommon(zrpc.MustNewClient(c.SysRpc.Conf))
+		TenantRpc = tenant.NewTenantManage(c.SysRpc.MustNewClient())
+		LogRpc = log.NewLog(c.SysRpc.MustNewClient())
+		UserRpc = user.NewUserManage(c.SysRpc.MustNewClient())
+		AuthRpc = role.NewRoleManage(c.SysRpc.MustNewClient())
+		Common = common.NewCommon(c.SysRpc.MustNewClient())
 	}
 	Slot, err := sysExport.NewSlotCache(Common)
 	logx.Must(err)

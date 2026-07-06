@@ -24,7 +24,6 @@ import (
 	"gitee.com/unitedrhino/share/utils"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type CheckTokenWareMiddleware struct {
@@ -60,10 +59,10 @@ func NewCheckTokenWareMiddleware2(SysRpc conf.RpcClientConf) *CheckTokenWareMidd
 		UserRpc = sysdirect.NewUser(SysRpc.RunProxy)
 		AuthRpc = sysdirect.NewRole(SysRpc.RunProxy)
 	} else {
-		TenantRpc = tenant.NewTenantManage(zrpc.MustNewClient(SysRpc.Conf))
-		LogRpc = operLog.NewLog(zrpc.MustNewClient(SysRpc.Conf))
-		UserRpc = user.NewUserManage(zrpc.MustNewClient(SysRpc.Conf))
-		AuthRpc = role.NewRoleManage(zrpc.MustNewClient(SysRpc.Conf))
+		TenantRpc = tenant.NewTenantManage(SysRpc.MustNewClient())
+		LogRpc = operLog.NewLog(SysRpc.MustNewClient())
+		UserRpc = user.NewUserManage(SysRpc.MustNewClient())
+		AuthRpc = role.NewRoleManage(SysRpc.MustNewClient())
 	}
 
 	return &CheckTokenWareMiddleware{UserRpc: UserRpc, AuthRpc: AuthRpc, TenantRpc: TenantRpc, LogRpc: LogRpc}

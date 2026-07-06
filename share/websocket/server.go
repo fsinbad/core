@@ -35,6 +35,8 @@ func MustNewServer(c rest.RestConf, opts ...RunOption) *Server {
 // NewServer returns a server with given config of c and options defined in opts.
 // Be aware that later RunOption might overwrite previous one that write the same option.
 func NewServer(c rest.RestConf, opts ...RunOption) (*Server, error) {
+	// 默认关闭 go-zero REST access log，项目自定义 HTTP 中间件会保留入口摘要
+	c.Verbose = false
 	if err := c.SetUp(); err != nil {
 		return nil, err
 	}

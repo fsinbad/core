@@ -36,7 +36,6 @@ import (
 	"gitee.com/unitedrhino/share/verify"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
-	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type SvrClient struct {
@@ -106,21 +105,21 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	ws.StartWsDp(false, nodeID, serverMsg, c.CacheRedis)
 	if c.SysRpc.Enable {
 		if c.SysRpc.Mode == conf.ClientModeGrpc {
-			projectM = projectmanage.NewProjectManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			areaM = areamanage.NewAreaManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			ur = user.NewUserManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			ro = role.NewRoleManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			me = module.NewModuleManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			lo = log.NewLog(zrpc.MustNewClient(c.SysRpc.Conf))
-			sysCommon = common.NewCommon(zrpc.MustNewClient(c.SysRpc.Conf))
-			appRpc = app.NewAppManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			tenantM = tenant.NewTenantManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			DataM = datamanage.NewDataManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			accessM = accessmanage.NewAccessManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			DictM = dictmanage.NewDictManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			Ops = ops.NewOps(zrpc.MustNewClient(c.SysRpc.Conf))
-			NotifyM = notifymanage.NewNotifyManage(zrpc.MustNewClient(c.SysRpc.Conf))
-			DeptM = departmentmanage.NewDepartmentManage(zrpc.MustNewClient(c.SysRpc.Conf))
+			projectM = projectmanage.NewProjectManage(c.SysRpc.MustNewClient())
+			areaM = areamanage.NewAreaManage(c.SysRpc.MustNewClient())
+			ur = user.NewUserManage(c.SysRpc.MustNewClient())
+			ro = role.NewRoleManage(c.SysRpc.MustNewClient())
+			me = module.NewModuleManage(c.SysRpc.MustNewClient())
+			lo = log.NewLog(c.SysRpc.MustNewClient())
+			sysCommon = common.NewCommon(c.SysRpc.MustNewClient())
+			appRpc = app.NewAppManage(c.SysRpc.MustNewClient())
+			tenantM = tenant.NewTenantManage(c.SysRpc.MustNewClient())
+			DataM = datamanage.NewDataManage(c.SysRpc.MustNewClient())
+			accessM = accessmanage.NewAccessManage(c.SysRpc.MustNewClient())
+			DictM = dictmanage.NewDictManage(c.SysRpc.MustNewClient())
+			Ops = ops.NewOps(c.SysRpc.MustNewClient())
+			NotifyM = notifymanage.NewNotifyManage(c.SysRpc.MustNewClient())
+			DeptM = departmentmanage.NewDepartmentManage(c.SysRpc.MustNewClient())
 		} else {
 			projectM = sysdirect.NewProjectManage(c.SysRpc.RunProxy)
 			areaM = sysdirect.NewAreaManage(c.SysRpc.RunProxy)
@@ -142,14 +141,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	if c.TimedSchedulerRpc.Enable {
 		if c.TimedSchedulerRpc.Mode == conf.ClientModeGrpc {
-			timedSchedule = timedscheduler.NewTimedscheduler(zrpc.MustNewClient(c.TimedSchedulerRpc.Conf))
+			timedSchedule = timedscheduler.NewTimedscheduler(c.TimedSchedulerRpc.MustNewClient())
 		} else {
 			timedSchedule = timedschedulerdirect.NewScheduler(c.TimedSchedulerRpc.RunProxy)
 		}
 	}
 	if c.TimedJobRpc.Enable {
 		if c.TimedJobRpc.Mode == conf.ClientModeGrpc {
-			timedJob = timedmanage.NewTimedManage(zrpc.MustNewClient(c.TimedJobRpc.Conf))
+			timedJob = timedmanage.NewTimedManage(c.TimedJobRpc.MustNewClient())
 		} else {
 			timedJob = timedjobdirect.NewTimedJob(c.TimedJobRpc.RunProxy)
 		}

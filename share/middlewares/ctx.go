@@ -3,8 +3,11 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
+	"time"
+
 	"gitee.com/unitedrhino/share/ctxs"
-	"gitee.com/unitedrhino/share/def"
 	"gitee.com/unitedrhino/share/errors"
 	"gitee.com/unitedrhino/share/result"
 	"gitee.com/unitedrhino/share/utils"
@@ -12,13 +15,11 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/metric"
 	"github.com/zeromicro/go-zero/core/timex"
-	"io"
-	"net/http"
-	"strings"
 )
 
 const bodySize = 256
 const serverNamespace = "http_server"
+const defaultSlowThreshold = time.Second
 
 var (
 	metricServerReqDur = metric.NewHistogramVec(&metric.HistogramVecOpts{
@@ -58,12 +59,31 @@ func InitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			useTime := timex.Since(startTime)
 			metricServerReqDur.Observe(useTime.Milliseconds(),
 				r.URL.Path, cast.ToString(resp.StatusCode), uc.TenantCode)
-			if strings.Contains(r.Header.Get(def.ContentType), def.ApplicationJson) {
-				logx.WithContext(r.Context()).Infof("[HTTP %v %v] %s use:%v uc:[%v]  reqBody:[%v] respBody:[%v]",
-					resp.StatusCode, resp.Status, r.RequestURI, useTime, utils.Fmt(uc), string(reqBody), string(respBody))
-			} else {
-				logx.WithContext(r.Context()).Infof("[HTTP %v %v] %s use:%v uc:[%v]  respBody:[%v]",
-					resp.StatusCode, resp.Status, r.RequestURI, useTime, utils.Fmt(uc), string(respBody))
+			costMs := float64(useTime.Microseconds()) / 1000
+			// HTTP 入口摘要：覆盖 go-zero access log 能力，打印请求体，不打印成功响应体
+			logx.WithContext(r.Context()).Infow("http",
+				logx.Field("method", r.Method),
+				logx.Field("path", r.URL.Path),
+				logx.Field("status", resp.StatusCode),
+				logx.Field("cost", costMs),
+				logx.Field("userID", uc.UserID),
+				logx.Field("tenant", uc.TenantCode),
+				logx.Field("req", string(reqBody)),
+				logx.Field("reqSize", len(reqBody)),
+				logx.Field("respSize", len(respBody)),
+			)
+			if useTime > defaultSlowThreshold {
+				logx.WithContext(r.Context()).Sloww("http slowcall",
+					logx.Field("method", r.Method),
+					logx.Field("path", r.URL.Path),
+					logx.Field("status", resp.StatusCode),
+					logx.Field("cost", costMs),
+					logx.Field("userID", uc.UserID),
+					logx.Field("tenant", uc.TenantCode),
+					logx.Field("req", string(reqBody)),
+					logx.Field("reqSize", len(reqBody)),
+					logx.Field("respSize", len(respBody)),
+				)
 			}
 
 		}()
